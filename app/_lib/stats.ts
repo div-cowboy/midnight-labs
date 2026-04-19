@@ -86,8 +86,12 @@ export async function readStats(): Promise<Stats> {
   };
 }
 
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
+  ? Omit<T, K>
+  : never;
+
 export async function logInstall(
-  event: Omit<InstallEvent, "ts" | "ua"> & { ua: string | null },
+  event: DistributiveOmit<InstallEvent, "ts">,
 ): Promise<void> {
   const record = { ...event, ts: new Date().toISOString() };
   try {
