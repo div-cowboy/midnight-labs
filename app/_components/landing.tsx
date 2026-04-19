@@ -5,8 +5,14 @@ import { motion } from "motion/react";
 import {
   hero,
   benchLogos,
+  benchLabel,
+  math,
+  tiers,
+  phasesSection,
   phases,
-  protocol,
+  library,
+  whyMidnight,
+  finalCta,
   footer,
 } from "../_content/homepage";
 import { agents } from "../_content/agents";
@@ -17,9 +23,11 @@ export function Landing() {
     <div className="min-h-screen bg-black text-neutral-50">
       <Navbar />
       <Hero />
+      <MathSection />
+      <Engagement />
       <Process />
-      <Pillars />
       <Library />
+      <WhyMidnight />
       <CTA />
     </div>
   );
@@ -36,7 +44,7 @@ function Navbar() {
           <span className="tracking-tight">Midnight AI</span>
         </Link>
         <div className="hidden md:flex items-center gap-8 text-[14px] text-neutral-400">
-          <a href="#process" className="hover:text-white transition-colors">
+          <a href="#engagement" className="hover:text-white transition-colors">
             Process
           </a>
           <a href="#protocol" className="hover:text-white transition-colors">
@@ -75,7 +83,7 @@ function Hero() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/8 text-[13px] text-neutral-400 mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Now enrolling — 90-day engagements
+            {hero.eyebrow}
           </div>
         </motion.div>
 
@@ -85,10 +93,10 @@ function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          Your company, AI-native.
+          Built by operators.
           <br />
           <span className="bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-            In 90 days.
+            Installed in your company.
           </span>
         </motion.h1>
 
@@ -128,7 +136,7 @@ function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
         >
           <p className="text-[13px] text-neutral-500 mb-6 uppercase tracking-widest">
-            Operators who&apos;ve shipped at
+            {benchLabel}
           </p>
           <div className="flex items-center justify-center gap-10 flex-wrap text-neutral-500/60">
             {benchLogos.map((name) => (
@@ -143,26 +151,180 @@ function Hero() {
   );
 }
 
-/* ─────────────────────────────────────────── PROCESS (phases) */
+/* ─────────────────────────────────────────── THE MATH */
 
-const phaseIcons = [ScanIcon, ZapIcon, RocketIcon, ShieldIcon];
-
-function Process() {
+function MathSection() {
   return (
-    <section id="process" className="py-32 px-6">
+    <section className="py-32 px-6 border-t border-white/8">
       <div className="max-w-5xl mx-auto">
         <motion.div
-          className="text-center mb-20"
+          className="max-w-3xl mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
           <p className="text-[13px] text-neutral-500 uppercase tracking-widest mb-4">
-            The Process
+            {math.eyebrow}
+          </p>
+          <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] text-white tracking-[-0.02em] mb-6">
+            {math.headline}
+          </h2>
+          <p className="text-[17px] text-neutral-400 leading-relaxed">
+            {math.body}
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {math.stats.map((stat, i) => (
+            <motion.div
+              key={stat.value}
+              className="p-8 rounded-2xl border border-white/8 bg-neutral-950"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+            >
+              <p className="text-[clamp(2rem,4vw,3rem)] text-white tracking-[-0.02em] leading-none mb-4 bg-gradient-to-br from-white via-white to-neutral-400 bg-clip-text text-transparent">
+                {stat.value}
+              </p>
+              <p className="text-[14px] text-neutral-400 leading-relaxed">
+                {stat.caption}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────── THE ENGAGEMENT (tiers) */
+
+function Engagement() {
+  return (
+    <section
+      id="engagement"
+      className="py-32 px-6 border-t border-white/8 relative overflow-hidden"
+    >
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-gradient-to-b from-purple-500/8 via-blue-500/4 to-transparent rounded-full blur-3xl pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        <motion.div
+          className="text-center max-w-3xl mx-auto mb-20"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <p className="text-[13px] text-neutral-500 uppercase tracking-widest mb-4">
+            {tiers.eyebrow}
+          </p>
+          <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] text-white tracking-[-0.02em] mb-6">
+            {tiers.headline}
+          </h2>
+          <p className="text-[17px] text-neutral-400 leading-relaxed">
+            {tiers.sub}
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          {tiers.tiers.map((tier, i) => {
+            const featured = Boolean(tier.badge);
+            return (
+              <motion.div
+                key={tier.id}
+                className={`group relative p-8 rounded-2xl border bg-neutral-950 flex flex-col transition-all duration-300 ${
+                  featured
+                    ? "border-white/20 hover:border-white/30"
+                    : "border-white/8 hover:border-white/15"
+                }`}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+              >
+                {featured && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 text-[11px] uppercase tracking-widest text-white">
+                    {tier.badge}
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between mb-6">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-500">
+                    {tier.number}
+                  </p>
+                  <p className="text-[13px] text-neutral-400">
+                    {tier.duration}
+                  </p>
+                </div>
+
+                <h3 className="text-white text-[22px] tracking-tight mb-4">
+                  {tier.name}
+                </h3>
+
+                <p className="text-[15px] text-neutral-400 leading-relaxed mb-6 flex-1">
+                  {tier.description}
+                </p>
+
+                <div className="pt-6 border-t border-white/8">
+                  <p className="text-[11px] uppercase tracking-widest text-neutral-500 mb-2">
+                    Best for
+                  </p>
+                  <p className="text-[14px] text-neutral-300 leading-relaxed">
+                    {tier.bestFor}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        <motion.div
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <Link
+            href={hero.primary.href}
+            className="flex items-center gap-2 px-6 py-3 rounded-full bg-white text-black hover:bg-white/90 transition-colors"
+          >
+            {tiers.footnote} <ArrowRightIcon className="w-4 h-4" />
+          </Link>
+          <a
+            href="#protocol"
+            className="flex items-center gap-2 px-6 py-3 rounded-full border border-white/8 text-neutral-400 hover:text-white hover:border-white/20 transition-colors"
+          >
+            Read the Protocol
+          </a>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────── PROCESS (phases, per-tier timings) */
+
+const phaseIcons = [ScanIcon, ZapIcon, RocketIcon, ShieldIcon];
+
+function Process() {
+  return (
+    <section id="protocol" className="py-32 px-6 border-t border-white/8">
+      <div className="max-w-5xl mx-auto">
+        <motion.div
+          className="text-center max-w-3xl mx-auto mb-20"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <p className="text-[13px] text-neutral-500 uppercase tracking-widest mb-4">
+            {phasesSection.eyebrow}
           </p>
           <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] text-white tracking-[-0.02em]">
-            Ninety days to full AI fluency
+            {phasesSection.headline}
           </h2>
         </motion.div>
 
@@ -172,7 +334,7 @@ function Process() {
             return (
               <motion.div
                 key={phase.number}
-                className="group relative p-8 rounded-2xl border border-white/8 bg-neutral-950 hover:border-white/15 transition-all duration-300"
+                className="group relative p-8 rounded-2xl border border-white/8 bg-neutral-950 hover:border-white/15 transition-all duration-300 flex flex-col"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -183,72 +345,31 @@ function Process() {
                     <Icon className="w-5 h-5 text-white/70" />
                   </div>
                   <span className="text-[13px] text-neutral-500 uppercase tracking-wider">
-                    Phase {phase.number} · {phase.duration}
+                    Phase {phase.number}
                   </span>
                 </div>
-                <h3 className="text-white text-[18px] mb-2">{phase.name}</h3>
-                <p className="text-neutral-400 text-[15px] leading-relaxed mb-4">
-                  {phase.protocol}
+
+                <h3 className="text-white text-[20px] tracking-tight mb-3">
+                  {phase.name}
+                </h3>
+
+                <p className="text-neutral-400 text-[15px] leading-relaxed mb-6 flex-1">
+                  {phase.description}
                 </p>
-                <ul className="space-y-2 text-[14px] text-neutral-400/90 leading-relaxed">
-                  {phase.outcomes.map((o) => (
-                    <li key={o} className="flex gap-2">
-                      <span className="text-white/40">—</span>
-                      <span>{o}</span>
-                    </li>
+
+                <div className="pt-5 border-t border-white/8 grid grid-cols-3 gap-3">
+                  {phase.timings.map((t) => (
+                    <div key={t.label}>
+                      <p className="text-[11px] uppercase tracking-widest text-neutral-500 mb-1">
+                        {t.label}
+                      </p>
+                      <p className="text-[13px] text-neutral-200">{t.value}</p>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </motion.div>
             );
           })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────── PILLARS (the protocol) */
-
-function Pillars() {
-  return (
-    <section id="protocol" className="py-32 px-6 border-t border-white/8">
-      <div className="max-w-5xl mx-auto">
-        <motion.div
-          className="text-center mb-20"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <p className="text-[13px] text-neutral-500 uppercase tracking-widest mb-4">
-            The methodology
-          </p>
-          <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] text-white tracking-[-0.02em]">
-            {protocol.name}
-          </h2>
-        </motion.div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {protocol.pillars.map((p, i) => (
-            <motion.div
-              key={p.id}
-              className="p-8 rounded-2xl border border-white/8 bg-neutral-950"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-            >
-              <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-neutral-500">
-                {p.number}
-              </p>
-              <p className="text-[18px] text-white mt-4 tracking-tight">
-                {p.name}
-              </p>
-              <p className="text-[14px] text-neutral-400 mt-3 leading-relaxed">
-                {p.oneLiner}
-              </p>
-            </motion.div>
-          ))}
         </div>
       </div>
     </section>
@@ -276,15 +397,13 @@ function Library() {
         >
           <div>
             <p className="text-[13px] text-neutral-500 uppercase tracking-widest mb-4">
-              The artifact
+              {library.eyebrow}
             </p>
-            <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] text-white tracking-[-0.02em]">
-              The Midnight Library
+            <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] text-white tracking-[-0.02em] max-w-2xl">
+              {library.headline}
             </h2>
             <p className="mt-4 max-w-xl text-[16px] text-neutral-400 leading-relaxed">
-              A curated set of Claude Code subagents we ship to every
-              engagement. One-command install. Pick a specialist, drop it into
-              your repo.
+              {library.body}
             </p>
           </div>
           <Link
@@ -314,6 +433,50 @@ function Library() {
   );
 }
 
+/* ─────────────────────────────────────────── WHY MIDNIGHT */
+
+function WhyMidnight() {
+  return (
+    <section className="py-32 px-6 border-t border-white/8">
+      <div className="max-w-5xl mx-auto">
+        <motion.div
+          className="max-w-3xl mb-20"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <p className="text-[13px] text-neutral-500 uppercase tracking-widest mb-4">
+            {whyMidnight.eyebrow}
+          </p>
+          <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] text-white tracking-[-0.02em]">
+            {whyMidnight.headline}
+          </h2>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 gap-x-12 gap-y-12">
+          {whyMidnight.pillars.map((pillar, i) => (
+            <motion.div
+              key={pillar.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+            >
+              <h3 className="text-white text-[20px] tracking-tight mb-3">
+                {pillar.title}
+              </h3>
+              <p className="text-[16px] text-neutral-400 leading-relaxed">
+                {pillar.body}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─────────────────────────────────────────── CTA + FOOTER */
 
 function CTA() {
@@ -332,16 +495,13 @@ function CTA() {
         transition={{ duration: 0.6 }}
       >
         <p className="text-[13px] text-neutral-500 uppercase tracking-widest mb-4">
-          Next step
+          {finalCta.eyebrow}
         </p>
-        <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] text-white tracking-[-0.02em] mb-4">
-          Ready to install
-          <br />
-          the Protocol?
+        <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] text-white tracking-[-0.02em] mb-6">
+          {finalCta.headline}
         </h2>
-        <p className="text-[17px] text-neutral-400 max-w-md mx-auto mb-10 leading-relaxed">
-          30 minutes. No pitch deck. We ask about your org, your current AI
-          usage, and what you want shipped in 90 days.
+        <p className="text-[17px] text-neutral-400 max-w-xl mx-auto mb-10 leading-relaxed">
+          {finalCta.body}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -355,12 +515,12 @@ function CTA() {
             href="#protocol"
             className="flex items-center gap-2 px-8 py-3.5 rounded-full border border-white/8 text-neutral-400 hover:text-white hover:border-white/20 transition-colors"
           >
-            Read the Protocol
+            {hero.secondary.label}
           </a>
         </div>
 
         <p className="text-[13px] text-neutral-500/70 mt-8">
-          Calibrated per engagement. Remote + onsite.
+          {finalCta.footnote}
         </p>
       </motion.div>
 

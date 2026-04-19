@@ -31,11 +31,11 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL("https://trymidnightai.com"),
   title: {
-    default: "Midnight AI — Your company, AI-native. In 90 days.",
+    default: "Midnight AI — Built by operators. Installed in your company.",
     template: "%s — Midnight AI",
   },
   description:
-    "The Midnight Protocol is a multi-week transformation engagement for mid-market companies — run by operators who've shipped at NASA, Vercel, Shopify, WordPress, and Nielsen.",
+    "The Midnight Protocol turns mid-market companies into AI-native ones — designed and run by engineers who've shipped at NASA, Vercel, Shopify, WordPress, and Nielsen. Not a deck. Not a framework. An installation.",
 };
 
 export default function RootLayout({
