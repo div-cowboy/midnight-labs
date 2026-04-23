@@ -1687,3 +1687,34 @@
 .midnight-dashboard .side-link-arrow { color: var(--fg-3); }
 
 .midnight-dashboard .portrait { border-radius: 50%; overflow: hidden; }
+
+/* Forms — Week 3: author-a-new-agent */
+.midnight-dashboard .form-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  color: var(--fg);
+  font-size: 13.5px;
+  font-family: var(--sans);
+  line-height: 1.45;
+  transition: border-color 120ms, background 120ms;
+}
+.midnight-dashboard .form-input:focus {
+  outline: none;
+  border-color: var(--accent, #8b5cf6);
+  background: var(--bg-2);
+}
+.midnight-dashboard textarea.form-input {
+  resize: vertical;
+  min-height: 72px;
+}
+.midnight-dashboard select.form-input {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--fg-3) 50%), linear-gradient(135deg, var(--fg-3) 50%, transparent 50%);
+  background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 32px;
+}
