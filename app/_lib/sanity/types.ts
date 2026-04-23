@@ -1,0 +1,87 @@
+import type { PortableTextBlock } from "next-sanity";
+
+export type SanityTeamMember = {
+  _id: string;
+  name: string;
+  role?: string;
+  bio?: string;
+  tier?: "lead" | "bench" | "founder";
+  logos?: string[];
+  avatarUrl?: string | null;
+};
+
+export type SanityLesson = {
+  _key: string;
+  title: string;
+  duration?: string;
+  videoUrl?: string;
+  summary?: string;
+};
+
+export type SanityCourseCard = {
+  _id: string;
+  id: string;
+  title: string;
+  slug: string;
+  summary?: string;
+  accentColor?: string;
+  order?: number;
+  trackTitle?: string;
+  trackSlug?: string;
+  trackOrder?: number;
+  lessonCount: number;
+  lessons?: SanityLesson[];
+  instructor?: SanityTeamMember | null;
+};
+
+export type SanityCourseDetail = SanityCourseCard & {
+  body?: PortableTextBlock[];
+};
+
+export type SanityArticleCard = {
+  _id: string;
+  title: string;
+  slug: string;
+  summary?: string;
+  accentColor?: string;
+  readTime?: string;
+  tags?: string[];
+  publishedAt: string;
+  author?: SanityTeamMember | null;
+  thumbnailUrl?: string | null;
+};
+
+export type SanityArticleDetail = SanityArticleCard & {
+  body?: PortableTextBlock[];
+};
+
+export type SanityPillarStatus = "upcoming" | "active" | "done";
+
+export type SanityPillar = {
+  _key: string;
+  name: string;
+  status: SanityPillarStatus;
+  summary?: string;
+  deliverables?: Array<{
+    _key: string;
+    name: string;
+    done?: boolean;
+    due?: string;
+  }>;
+};
+
+export type SanityEngagement = {
+  _id: string;
+  client: string;
+  slug: string;
+  headline?: string;
+  startDate: string;
+  endDate: string;
+  currentDay?: number;
+  slackChannel?: string;
+  lead?: SanityTeamMember | null;
+  bench?: SanityTeamMember[];
+  pillars?: SanityPillar[];
+  pinnedCourses?: SanityCourseCard[];
+  pinnedArticles?: SanityArticleCard[];
+};
