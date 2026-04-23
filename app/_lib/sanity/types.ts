@@ -119,6 +119,42 @@ export type SanityAgentForDownload = {
   workspaceSlug?: string | null;
 };
 
+export type SanityAuthor = {
+  clerkUserId: string;
+  displayName: string;
+  email?: string;
+  isMidnightStaff?: boolean;
+};
+
+export type SanityThreadCard = {
+  _id: string;
+  _createdAt: string;
+  title: string;
+  slug: string;
+  kind: "question" | "tip";
+  tags?: string[];
+  upvotes?: number;
+  isPinned?: boolean;
+  isResolved?: boolean;
+  author: SanityAuthor;
+  replyCount: number;
+};
+
+export type SanityReply = {
+  _id: string;
+  _createdAt: string;
+  body: string;
+  upvotes?: number;
+  isOfficial?: boolean;
+  author: SanityAuthor;
+};
+
+export type SanityThreadDetail = SanityThreadCard & {
+  body: string;
+  workspaceId: string;
+  replies: SanityReply[];
+};
+
 export type SanityEngagement = {
   _id: string;
   client: string;

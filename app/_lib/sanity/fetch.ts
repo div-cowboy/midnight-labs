@@ -12,6 +12,8 @@ import {
   COURSES_QUERY,
   DEFAULT_ENGAGEMENT_QUERY,
   ENGAGEMENT_BY_SLUG_QUERY,
+  THREAD_BY_ID_QUERY,
+  THREADS_QUERY,
 } from "./queries";
 
 type FetchOptions = { tags?: string[]; revalidate?: number };
@@ -91,4 +93,18 @@ export const getAgentSlugs = () =>
     AGENT_SLUGS_QUERY,
     {},
     { revalidate: 300, tags: ["agent"] },
+  );
+
+export const getThreads = (workspace: string) =>
+  fetchWith(
+    THREADS_QUERY,
+    { workspace },
+    { tags: ["thread", `thread:workspace:${workspace}`], revalidate: 10 },
+  );
+
+export const getThread = (id: string, workspace: string) =>
+  fetchWith(
+    THREAD_BY_ID_QUERY,
+    { id, workspace },
+    { tags: ["thread", "reply", `thread:${id}`], revalidate: 10 },
   );

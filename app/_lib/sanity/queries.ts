@@ -193,3 +193,50 @@ export const AGENT_SLUGS_QUERY = defineQuery(/* groq */ `
     "slug": slug.current
   }
 `);
+
+const authorProjection = /* groq */ `
+  author {
+    clerkUserId,
+    displayName,
+    email,
+    isMidnightStaff
+  }
+`;
+
+const threadCardProjection = /* groq */ `
+  _id,
+  _createdAt,
+  title,
+  "slug": slug.current,
+  kind,
+  tags,
+  upvotes,
+  isPinned,
+  isResolved,
+  ${authorProjection},
+  "replyCount": count(*[_type == "reply" && thread._ref == ^._id])
+`;
+
+export const THREADS_QUERY = defineQuery(/* groq */ `
+  *[_type == "thread" && workspace->slug.current == $workspace]
+  | order(isPinned desc, _createdAt desc) {
+    ${threadCardProjection}
+  }
+`);
+
+export const THREAD_BY_ID_QUERY = defineQuery(/* groq */ `
+  *[_type == "thread" && _id == $id && workspace->slug.current == $workspace][0]{
+    ${threadCardProjection},
+    body,
+    "workspaceId": workspace->_id,
+    "replies": *[_type == "reply" && thread._ref == ^._id]
+      | order(isOfficial desc, upvotes desc, _createdAt asc) {
+        _id,
+        _createdAt,
+        body,
+        upvotes,
+        isOfficial,
+        ${authorProjection}
+      }
+  }
+`);
