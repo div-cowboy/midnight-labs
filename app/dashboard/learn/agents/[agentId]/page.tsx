@@ -3,7 +3,17 @@ import { notFound } from "next/navigation";
 import { Icons } from "../../../_components/icons";
 import { AgentStatBars } from "../../../_components/agent-stats";
 import { initials } from "../../../_components/data";
-import { agents, tierColors } from "../../../_components/learn-data";
+import { tierColors } from "../../../_components/learn-data";
+import { getAgent, getAgentSlugs } from "@/app/_lib/sanity/fetch";
+import { toUIAgentDetail } from "@/app/_lib/sanity/transformers";
+import type { SanityAgentDetail } from "@/app/_lib/sanity/types";
+
+export const revalidate = 60;
+
+export async function generateStaticParams() {
+  const slugs = await getAgentSlugs();
+  return slugs.map((s) => ({ agentId: s.slug }));
+}
 
 export default async function AgentDetailPage({
   params,
@@ -11,17 +21,21 @@ export default async function AgentDetailPage({
   params: Promise<{ agentId: string }>;
 }) {
   const { agentId } = await params;
-  const agent = agents.find((a) => a.id === agentId);
-  if (!agent) notFound();
+  const raw = (await getAgent(agentId)) as SanityAgentDetail | null;
+  if (!raw) notFound();
 
-  const relatedCourses: { id: string; title: string; lessonCount: number; runtime: string }[] = [];
-  const relatedAgents = agent.relatedAgents
-    .map((id) => agents.find((a) => a.id === id))
-    .filter((a): a is NonNullable<typeof a> => Boolean(a));
+  const agent = toUIAgentDetail(raw);
 
   const example =
     agent.example ||
-    `> /${agent.id}\n\nAnalyzing…\n✓ Done. See output above.`;
+    `> /${agent.slug}\n\nAnalyzing…\n✓ Done. See output above.`;
+
+  const installNamespace =
+    agent.tier === "custom"
+      ? (agent.workspaceSlug ?? "your-workspace")
+      : agent.tier === "core"
+        ? "anthropic"
+        : "midnight";
 
   return (
     <div className="fade-enter">
@@ -50,13 +64,17 @@ export default async function AgentDetailPage({
                   <div className="agent-tier-tag" data-tier={agent.tier}>
                     {agent.tier}
                   </div>
-                  <span className="mono muted" style={{ fontSize: 11 }}>
-                    by {agent.author}
-                  </span>
+                  {agent.author && (
+                    <span className="mono muted" style={{ fontSize: 11 }}>
+                      by {agent.author}
+                    </span>
+                  )}
                 </div>
                 <div className="agent-hero-title">{agent.name}</div>
                 <div className="agent-hero-tagline">{agent.tagline}</div>
-                <div className="agent-hero-desc">{agent.description}</div>
+                {agent.description && (
+                  <div className="agent-hero-desc">{agent.description}</div>
+                )}
                 <div
                   className="row"
                   style={{
@@ -66,10 +84,19 @@ export default async function AgentDetailPage({
                     zIndex: 1,
                   }}
                 >
-                  <button className="btn btn-primary">
-                    <Icons.download /> Install for my team
-                  </button>
-                  <button className="btn">Copy invocation</button>
+                  <a
+                    href={`/api/agents/${agent.slug}/download`}
+                    className="btn btn-primary"
+                    download={`${agent.slug}.md`}
+                  >
+                    <Icons.download /> Download for Claude Code
+                  </a>
+                  <Link
+                    href={`/dashboard/learn/agents/${agent.slug}#install`}
+                    className="btn"
+                  >
+                    How to install
+                  </Link>
                 </div>
               </div>
             </div>
@@ -78,16 +105,18 @@ export default async function AgentDetailPage({
           <div className="agent-kv-grid">
             <div className="agent-kv">
               <div className="agent-kv-label">Model</div>
-              <div className="agent-kv-value">{agent.model}</div>
+              <div className="agent-kv-value">{agent.modelLabel}</div>
             </div>
             <div className="agent-kv">
               <div className="agent-kv-label">Tools</div>
-              <div className="agent-kv-value">{agent.tools.join(", ")}</div>
+              <div className="agent-kv-value">
+                {(agent.tools ?? []).join(", ") || "—"}
+              </div>
             </div>
             <div className="agent-kv">
-              <div className="agent-kv-label">Installs</div>
+              <div className="agent-kv-label">Tags</div>
               <div className="agent-kv-value">
-                {agent.installs.toLocaleString()}
+                {(agent.tags ?? []).join(", ") || "—"}
               </div>
             </div>
           </div>
@@ -104,91 +133,88 @@ export default async function AgentDetailPage({
                   ) : line.startsWith("✓") ? (
                     <span className="accent">{line}</span>
                   ) : (
-                    <span className="out">{line || "\u00A0"}</span>
+                    <span className="out">{line || " "}</span>
                   )}
                 </div>
               ))}
             </pre>
           </div>
 
-          <div className="agent-install-card" style={{ marginTop: 16 }}>
+          <div
+            id="install"
+            className="agent-install-card"
+            style={{ marginTop: 16 }}
+          >
             <div className="agent-install-title">Install</div>
             <pre className="code-block" style={{ margin: 0 }}>
               <div>
-                <span className="comment"># From your terminal, inside your repo:</span>
-              </div>
-              <div>
-                <span className="prompt">$</span> claude agents install{" "}
-                <span className="accent">
-                  {agent.tier === "custom"
-                    ? `acme/${agent.id}`
-                    : `midnight/${agent.id}`}
+                <span className="comment">
+                  # From your repo root, download the agent file:
                 </span>
               </div>
+              <div>
+                <span className="prompt">$</span> mkdir -p .claude/agents && curl{" "}
+                <span className="accent">
+                  https://trymidnightai.com/api/agents/{agent.slug}/download
+                </span>{" "}
+                -o .claude/agents/{agent.slug}.md
+              </div>
               <div className="out">
-                Installed. Invoke with{" "}
-                <span style={{ color: "#c7d2fe" }}>/{agent.id}</span> in a Claude
-                Code session.
+                Commit it in with your team, then invoke{" "}
+                <span style={{ color: "#c7d2fe" }}>/{agent.slug}</span> inside a
+                Claude Code session.
+              </div>
+              <div>&nbsp;</div>
+              <div>
+                <span className="comment">
+                  # (npx midnight install {installNamespace}/{agent.slug} is
+                  coming — V1.1.)
+                </span>
               </div>
             </pre>
           </div>
+
+          {agent.systemPrompt && (
+            <div className="agent-install-card" style={{ marginTop: 16 }}>
+              <div className="agent-install-title">System prompt (preview)</div>
+              <pre
+                className="code-block"
+                style={{
+                  margin: 0,
+                  whiteSpace: "pre-wrap",
+                  maxHeight: 320,
+                  overflow: "auto",
+                }}
+              >
+                {agent.systemPrompt}
+              </pre>
+            </div>
+          )}
         </div>
 
         <div className="agent-side">
-          {relatedCourses.length > 0 && (
+          {agent.relatedCourses.length > 0 && (
             <div className="side-card">
               <div className="side-card-head">Lessons that teach this</div>
               <div className="side-card-body">
-                {relatedCourses.map((c) => (
+                {agent.relatedCourses.map((c) => (
                   <Link
-                    key={c.id}
-                    href={`/dashboard/learn/library/${c.id}`}
+                    key={c._id}
+                    href={`/dashboard/learn/library/${c.slug}`}
                     className="side-link"
                   >
-                    <div className="side-link-mark"><Icons.learn /></div>
+                    <div className="side-link-mark">
+                      <Icons.learn />
+                    </div>
                     <div style={{ minWidth: 0 }}>
                       <div className="side-link-title">{c.title}</div>
                       <div className="side-link-sub">
-                        {c.lessonCount} lessons · {c.runtime}
+                        {c.trackTitle} · {c.lessonCount} lessons
                       </div>
                     </div>
-                    <div className="side-link-arrow"><Icons.caret /></div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {relatedAgents.length > 0 && (
-            <div className="side-card">
-              <div className="side-card-head">Pairs well with</div>
-              <div className="side-card-body">
-                {relatedAgents.map((a) => (
-                  <Link
-                    key={a.id}
-                    href={`/dashboard/learn/agents/${a.id}`}
-                    className="side-link"
-                  >
-                    <div
-                      className="side-link-mark"
-                      style={{
-                        background: tierColors[a.tier],
-                        color: "#fff",
-                        border: "none",
-                        fontFamily: "var(--mono)",
-                        fontSize: 10,
-                        fontWeight: 600,
-                      }}
-                    >
-                      {initials(a.name)}
+                    <div className="side-link-arrow">
+                      <Icons.caret />
                     </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div className="side-link-title">{a.name}</div>
-                      <div className="side-link-sub">
-                        {a.tier} · {a.installs.toLocaleString()} installs
-                      </div>
-                    </div>
-                    <div className="side-link-arrow"><Icons.caret /></div>
                   </Link>
                 ))}
               </div>

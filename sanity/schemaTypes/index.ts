@@ -1,4 +1,5 @@
 import type { SchemaTypeDefinition } from "sanity";
+import { agent } from "./documents/agent";
 import { course } from "./documents/course";
 import { track } from "./documents/track";
 import { article } from "./documents/article";
@@ -14,6 +15,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     course,
     track,
     article,
+    agent,
     teamMember,
     // objects
     lesson,

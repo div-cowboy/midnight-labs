@@ -136,3 +136,60 @@ export const ARTICLE_BY_SLUG_QUERY = defineQuery(/* groq */ `
 export const ARTICLE_SLUGS_QUERY = defineQuery(/* groq */ `
   *[_type == "article" && defined(slug.current)]{ "slug": slug.current }
 `);
+
+const agentCardProjection = /* groq */ `
+  _id,
+  name,
+  "slug": slug.current,
+  tier,
+  tagline,
+  description,
+  model,
+  tools,
+  tags,
+  stats,
+  author,
+  "workspaceSlug": workspace->slug.current
+`;
+
+export const AGENTS_QUERY = defineQuery(/* groq */ `
+  *[_type == "agent" && (tier != "custom" || workspace->slug.current == $workspace)]
+  | order(tier asc, name asc) {
+    ${agentCardProjection}
+  }
+`);
+
+export const AGENT_BY_SLUG_QUERY = defineQuery(/* groq */ `
+  *[_type == "agent" && slug.current == $slug][0]{
+    ${agentCardProjection},
+    systemPrompt,
+    example,
+    "relatedCourses": relatedCourses[]->{
+      _id,
+      "id": slug.current,
+      title,
+      "slug": slug.current,
+      "trackTitle": track->title,
+      "lessonCount": count(lessons)
+    }
+  }
+`);
+
+export const AGENT_FOR_DOWNLOAD_QUERY = defineQuery(/* groq */ `
+  *[_type == "agent" && slug.current == $slug][0]{
+    name,
+    "slug": slug.current,
+    description,
+    model,
+    tools,
+    systemPrompt,
+    tier,
+    "workspaceSlug": workspace->slug.current
+  }
+`);
+
+export const AGENT_SLUGS_QUERY = defineQuery(/* groq */ `
+  *[_type == "agent" && defined(slug.current) && tier != "custom"]{
+    "slug": slug.current
+  }
+`);

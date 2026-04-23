@@ -1,5 +1,9 @@
 import { client } from "@/sanity/lib/client";
 import {
+  AGENT_BY_SLUG_QUERY,
+  AGENT_FOR_DOWNLOAD_QUERY,
+  AGENT_SLUGS_QUERY,
+  AGENTS_QUERY,
   ARTICLE_BY_SLUG_QUERY,
   ARTICLE_SLUGS_QUERY,
   ARTICLES_QUERY,
@@ -59,4 +63,32 @@ export const getArticleSlugs = () =>
     ARTICLE_SLUGS_QUERY,
     {},
     { revalidate: 300, tags: ["article"] },
+  );
+
+export const getAgents = (workspace?: string) =>
+  fetchWith(
+    AGENTS_QUERY,
+    { workspace: workspace ?? "__none__" },
+    { tags: ["agent", workspace ? `agent:workspace:${workspace}` : "agent:core"] },
+  );
+
+export const getAgent = (slug: string) =>
+  fetchWith(
+    AGENT_BY_SLUG_QUERY,
+    { slug },
+    { tags: ["agent", `agent:${slug}`, "course"] },
+  );
+
+export const getAgentForDownload = (slug: string) =>
+  fetchWith(
+    AGENT_FOR_DOWNLOAD_QUERY,
+    { slug },
+    { tags: ["agent", `agent:${slug}`] },
+  );
+
+export const getAgentSlugs = () =>
+  fetchWith<{ slug: string }[]>(
+    AGENT_SLUGS_QUERY,
+    {},
+    { revalidate: 300, tags: ["agent"] },
   );

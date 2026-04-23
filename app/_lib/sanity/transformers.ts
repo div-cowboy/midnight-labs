@@ -1,6 +1,8 @@
 import type { Instructor, Lesson } from "@/app/dashboard/_components/learn-data";
 import { instructors as fallbackInstructors } from "@/app/dashboard/_components/learn-data";
 import type {
+  SanityAgentCard,
+  SanityAgentDetail,
   SanityArticleCard,
   SanityArticleDetail,
   SanityCourseCard,
@@ -25,6 +27,18 @@ export type UICourse = {
 
 export type UIArticle = SanityArticleDetail & {
   instructor: Instructor & { id: string };
+};
+
+export type UIAgent = SanityAgentCard & {
+  id: string;
+  modelLabel: string;
+  stats: { power: number; speed: number; depth: number };
+};
+
+export type UIAgentDetail = UIAgent & {
+  systemPrompt?: string;
+  example?: string;
+  relatedCourses: NonNullable<SanityAgentDetail["relatedCourses"]>;
 };
 
 const ACCENT_FALLBACKS: [string, string][] = [
@@ -141,5 +155,33 @@ export function toUIArticle(
   return {
     ...(article as SanityArticleDetail),
     instructor: toInstructor(article.author ?? null),
+  };
+}
+
+const MODEL_LABELS: Record<string, string> = {
+  haiku: "Haiku 4.5",
+  sonnet: "Sonnet 4.6",
+  opus: "Opus 4.7",
+};
+
+export function toUIAgent(agent: SanityAgentCard): UIAgent {
+  return {
+    ...agent,
+    id: agent.slug,
+    modelLabel: MODEL_LABELS[agent.model ?? "sonnet"] ?? "Sonnet 4.6",
+    stats: {
+      power: agent.stats?.power ?? 3,
+      speed: agent.stats?.speed ?? 3,
+      depth: agent.stats?.depth ?? 3,
+    },
+  };
+}
+
+export function toUIAgentDetail(agent: SanityAgentDetail): UIAgentDetail {
+  return {
+    ...toUIAgent(agent),
+    systemPrompt: agent.systemPrompt,
+    example: agent.example,
+    relatedCourses: agent.relatedCourses ?? [],
   };
 }

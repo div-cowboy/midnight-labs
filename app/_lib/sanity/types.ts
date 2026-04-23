@@ -70,6 +70,55 @@ export type SanityPillar = {
   }>;
 };
 
+export type SanityAgentTier = "core" | "advanced" | "custom";
+
+export type SanityAgentStats = {
+  power?: number;
+  speed?: number;
+  depth?: number;
+};
+
+export type SanityAgentCard = {
+  _id: string;
+  name: string;
+  slug: string;
+  tier: SanityAgentTier;
+  tagline?: string;
+  description?: string;
+  model?: "haiku" | "sonnet" | "opus";
+  tools?: string[];
+  tags?: string[];
+  stats?: SanityAgentStats;
+  author?: string;
+  workspaceSlug?: string | null;
+};
+
+export type SanityAgentRelatedCourse = {
+  _id: string;
+  id: string;
+  title: string;
+  slug: string;
+  trackTitle?: string;
+  lessonCount: number;
+};
+
+export type SanityAgentDetail = SanityAgentCard & {
+  systemPrompt?: string;
+  example?: string;
+  relatedCourses?: SanityAgentRelatedCourse[];
+};
+
+export type SanityAgentForDownload = {
+  name: string;
+  slug: string;
+  description?: string;
+  model?: "haiku" | "sonnet" | "opus";
+  tools?: string[];
+  systemPrompt?: string;
+  tier: SanityAgentTier;
+  workspaceSlug?: string | null;
+};
+
 export type SanityEngagement = {
   _id: string;
   client: string;

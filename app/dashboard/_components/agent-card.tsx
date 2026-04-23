@@ -1,19 +1,19 @@
 import Link from "next/link";
 import { initials } from "./data";
 import { AgentStatBars } from "./agent-stats";
-import type { Agent } from "./learn-data";
 import { tierColors } from "./learn-data";
+import type { UIAgent } from "@/app/_lib/sanity/transformers";
 
 export function AgentCard({
   agent,
   showTier = true,
 }: {
-  agent: Agent;
+  agent: UIAgent;
   showTier?: boolean;
 }) {
   return (
     <Link
-      href={`/dashboard/learn/agents/${agent.id}`}
+      href={`/dashboard/learn/agents/${agent.slug}`}
       className="agent-card"
       data-tier={agent.tier}
     >
@@ -36,11 +36,11 @@ export function AgentCard({
         <AgentStatBars stats={agent.stats} variant="compact" />
       </div>
       <div className="agent-card-foot">
-        <span className="agent-model">{agent.model}</span>
-        <span className="agent-tool-count">{agent.tools.length} tools</span>
-        <span className="agent-installs">
-          {agent.installs.toLocaleString()} installs
+        <span className="agent-model">{agent.modelLabel}</span>
+        <span className="agent-tool-count">
+          {(agent.tools?.length ?? 0)} tools
         </span>
+        {agent.author && <span className="agent-installs">{agent.author}</span>}
       </div>
     </Link>
   );
