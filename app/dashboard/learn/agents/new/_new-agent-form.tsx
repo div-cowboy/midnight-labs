@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { Icons } from "../../../_components/icons";
 import { authorAgent, type AuthorAgentState } from "./actions";
+import { slugify } from "@/app/_lib/strings";
 
 const initialState: AuthorAgentState = {};
 
@@ -19,7 +20,7 @@ export function NewAgentForm({
     initialState,
   );
   const [name, setName] = useState("");
-  const autoSlug = slugify(name);
+  const autoSlug = slugify(name, 60);
 
   return (
     <div className="fade-enter">
@@ -251,10 +252,3 @@ function Field({
   );
 }
 
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 60);
-}

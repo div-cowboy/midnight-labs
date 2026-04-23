@@ -45,6 +45,18 @@ const articleCardProjection = /* groq */ `
   "thumbnailUrl": thumbnail.asset->url
 `;
 
+export const ENGAGEMENT_HEADER_QUERY = defineQuery(/* groq */ `
+  *[_type == "engagement" && (!defined($slug) || slug.current == $slug)]
+  | order(_createdAt asc)[0]{
+    _id,
+    client,
+    "slug": slug.current,
+    startDate,
+    endDate,
+    currentDay
+  }
+`);
+
 export const ENGAGEMENT_BY_SLUG_QUERY = defineQuery(/* groq */ `
   *[_type == "engagement" && slug.current == $slug][0]{
     _id,
@@ -153,7 +165,10 @@ const agentCardProjection = /* groq */ `
 `;
 
 export const AGENTS_QUERY = defineQuery(/* groq */ `
-  *[_type == "agent" && (tier != "custom" || workspace->slug.current == $workspace)]
+  *[_type == "agent" && (
+    tier != "custom" ||
+    workspace._ref in *[_type == "engagement" && slug.current == $workspace]._id
+  )]
   | order(tier asc, name asc) {
     ${agentCardProjection}
   }
@@ -218,17 +233,24 @@ const threadCardProjection = /* groq */ `
 `;
 
 export const THREADS_QUERY = defineQuery(/* groq */ `
-  *[_type == "thread" && workspace->slug.current == $workspace]
+  *[
+    _type == "thread" &&
+    workspace._ref in *[_type == "engagement" && slug.current == $workspace]._id
+  ]
   | order(isPinned desc, _createdAt desc) {
     ${threadCardProjection}
   }
 `);
 
 export const THREAD_BY_ID_QUERY = defineQuery(/* groq */ `
-  *[_type == "thread" && _id == $id && workspace->slug.current == $workspace][0]{
+  *[
+    _type == "thread" &&
+    _id == $id &&
+    workspace._ref in *[_type == "engagement" && slug.current == $workspace]._id
+  ][0]{
     ${threadCardProjection},
     body,
-    "workspaceId": workspace->_id,
+    "workspaceId": workspace._ref,
     "replies": *[_type == "reply" && thread._ref == ^._id]
       | order(isOfficial desc, upvotes desc, _createdAt asc) {
         _id,

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getArticles } from "@/app/_lib/sanity/fetch";
-import { toUIArticle } from "@/app/_lib/sanity/transformers";
+import { toUIArticleCard } from "@/app/_lib/sanity/transformers";
 import type { SanityArticleCard } from "@/app/_lib/sanity/types";
 import { ArticleCard } from "../../_components/article-card";
 
@@ -8,7 +8,7 @@ export const revalidate = 60;
 
 export default async function ArticlesPage() {
   const raw = (await getArticles()) as SanityArticleCard[];
-  const articles = raw.map(toUIArticle);
+  const articles = raw.map(toUIArticleCard);
 
   return (
     <div className="fade-enter">

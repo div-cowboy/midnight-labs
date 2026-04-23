@@ -12,6 +12,7 @@ import {
   COURSES_QUERY,
   DEFAULT_ENGAGEMENT_QUERY,
   ENGAGEMENT_BY_SLUG_QUERY,
+  ENGAGEMENT_HEADER_QUERY,
   THREAD_BY_ID_QUERY,
   THREADS_QUERY,
 } from "./queries";
@@ -32,6 +33,16 @@ export const getEngagement = (slug?: string) =>
   slug
     ? fetchWith(ENGAGEMENT_BY_SLUG_QUERY, { slug }, { tags: ["engagement", `engagement:${slug}`] })
     : fetchWith(DEFAULT_ENGAGEMENT_QUERY, {}, { tags: ["engagement"] });
+
+export const getEngagementHeader = (slug?: string) =>
+  fetchWith(
+    ENGAGEMENT_HEADER_QUERY,
+    { slug: slug ?? null },
+    {
+      tags: slug ? ["engagement", `engagement:${slug}`] : ["engagement"],
+      revalidate: 300,
+    },
+  );
 
 export const getCourses = () =>
   fetchWith(COURSES_QUERY, {}, { tags: ["course", "track", "teamMember"] });

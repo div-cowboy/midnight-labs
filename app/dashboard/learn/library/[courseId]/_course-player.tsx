@@ -152,9 +152,7 @@ export function CoursePlayer({ course }: { course: UICourse }) {
                   </div>
                   <div className="transcript-list">
                     {filtered.map((line, i) => {
-                      const isCurrent =
-                        !query &&
-                        transcript.indexOf(line) === currentTranscriptIdx;
+                      const isCurrent = !query && i === currentTranscriptIdx;
                       return (
                         <div
                           key={i}

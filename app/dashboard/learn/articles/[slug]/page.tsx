@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { PortableText, type PortableTextComponents } from "next-sanity";
 import { getArticle, getArticleSlugs } from "@/app/_lib/sanity/fetch";
-import { toUIArticle } from "@/app/_lib/sanity/transformers";
+import { toUIArticleDetail } from "@/app/_lib/sanity/transformers";
 import { urlFor } from "@/sanity/lib/image";
 import type { SanityArticleDetail } from "@/app/_lib/sanity/types";
 import { InstructorChip } from "../../../_components/portrait";
@@ -121,7 +121,7 @@ export default async function ArticleDetailPage({
   const raw = (await getArticle(slug)) as SanityArticleDetail | null;
   if (!raw) notFound();
 
-  const article = toUIArticle(raw);
+  const article = toUIArticleDetail(raw);
   const date = new Date(article.publishedAt).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",

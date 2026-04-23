@@ -155,6 +155,15 @@ export type SanityThreadDetail = SanityThreadCard & {
   replies: SanityReply[];
 };
 
+export type SanityEngagementHeader = {
+  _id: string;
+  client: string;
+  slug: string;
+  startDate: string;
+  endDate: string;
+  currentDay?: number;
+};
+
 export type SanityEngagement = {
   _id: string;
   client: string;

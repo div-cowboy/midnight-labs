@@ -34,8 +34,6 @@ export type Agent = {
 
 export type TranscriptLine = { t: string; text: string };
 
-// Fallback instructor styling used when a Sanity teamMember doesn't
-// match a known key. Real instructor data comes from the CMS.
 export const instructors: Record<string, Instructor> = {
   rae: {
     name: "Rae Castellanos",
@@ -81,8 +79,6 @@ export const instructors: Record<string, Instructor> = {
   },
 };
 
-// Static transcript used by the player until per-lesson transcripts are
-// modeled in Sanity. Replaced in V1.1.
 export const transcript: TranscriptLine[] = [
   { t: "0:00", text: "A long session with Claude doesn't have to feel like a long session." },
   { t: "0:06", text: "Most people treat pairing like a monologue — they dump a problem, wait for the output, paste the next thing." },
@@ -111,7 +107,6 @@ export const trackPalette: Record<string, [string, string]> = {
   "Advanced Patterns": ["#5a3b1e", "#a76b3a"],
 };
 
-// Agent fallback data used by the Agent library until Week 2 wires it to Sanity.
 export const agents: Agent[] = [
   {
     id: "explain-this",

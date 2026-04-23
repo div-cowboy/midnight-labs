@@ -21,7 +21,7 @@ export const lesson = defineType({
       name: "videoUrl",
       title: "Video URL",
       description:
-        "Paste any YouTube / Vimeo / Mux playback URL. Hosting is deferred to V1.1.",
+        "Paste any YouTube / Vimeo / Mux playback URL.",
       type: "url",
       validation: (rule) =>
         rule.uri({ scheme: ["http", "https"] }).required(),

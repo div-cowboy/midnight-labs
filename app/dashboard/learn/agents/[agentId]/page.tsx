@@ -30,12 +30,21 @@ export default async function AgentDetailPage({
     agent.example ||
     `> /${agent.slug}\n\nAnalyzing…\n✓ Done. See output above.`;
 
-  const installNamespace =
-    agent.tier === "custom"
-      ? (agent.workspaceSlug ?? "your-workspace")
-      : agent.tier === "core"
-        ? "anthropic"
-        : "midnight";
+  const TIER_NAMESPACE: Record<typeof agent.tier, string> = {
+    core: "anthropic",
+    advanced: "midnight",
+    custom: agent.workspaceSlug ?? "your-workspace",
+  };
+  const installNamespace = TIER_NAMESPACE[agent.tier];
+
+  const LINE_PREFIX_CLASS: { prefix: string; className: string }[] = [
+    { prefix: ">", className: "prompt" },
+    { prefix: "//", className: "comment" },
+    { prefix: "#", className: "comment" },
+    { prefix: "✓", className: "accent" },
+  ];
+  const classifyLine = (line: string) =>
+    LINE_PREFIX_CLASS.find((m) => line.startsWith(m.prefix))?.className ?? "out";
 
   return (
     <div className="fade-enter">
@@ -126,15 +135,7 @@ export default async function AgentDetailPage({
             <pre className="code-block" style={{ margin: 0 }}>
               {example.split("\n").map((line, i) => (
                 <div key={i}>
-                  {line.startsWith(">") ? (
-                    <span className="prompt">{line}</span>
-                  ) : line.startsWith("//") || line.startsWith("#") ? (
-                    <span className="comment">{line}</span>
-                  ) : line.startsWith("✓") ? (
-                    <span className="accent">{line}</span>
-                  ) : (
-                    <span className="out">{line || " "}</span>
-                  )}
+                  <span className={classifyLine(line)}>{line || " "}</span>
                 </div>
               ))}
             </pre>

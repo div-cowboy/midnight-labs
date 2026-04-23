@@ -1,15 +1,13 @@
 import { Icons } from "./icons";
-import { getEngagement } from "@/app/_lib/sanity/fetch";
-import type { SanityEngagement } from "@/app/_lib/sanity/types";
-
-function totalDays(start: string, end: string): number {
-  const s = new Date(start).getTime();
-  const e = new Date(end).getTime();
-  return Math.max(1, Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1);
-}
+import { getEngagementHeader } from "@/app/_lib/sanity/fetch";
+import { getWorkspaceSlug } from "@/app/_lib/workspace";
+import { totalDays } from "@/app/_lib/time";
+import type { SanityEngagementHeader } from "@/app/_lib/sanity/types";
 
 export async function Topbar() {
-  const engagement = (await getEngagement()) as SanityEngagement | null;
+  const workspace = await getWorkspaceSlug();
+  const engagement = (await getEngagementHeader(workspace)) as SanityEngagementHeader | null;
+
   const days = engagement
     ? totalDays(engagement.startDate, engagement.endDate)
     : null;

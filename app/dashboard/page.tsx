@@ -4,22 +4,24 @@ import { Portrait } from "./_components/portrait";
 import { CourseCard } from "./_components/course-card";
 import { ArticleCard } from "./_components/article-card";
 import { getEngagement } from "@/app/_lib/sanity/fetch";
-import type { SanityEngagement } from "@/app/_lib/sanity/types";
-import { toInstructor, toUIArticle, toUICourse } from "@/app/_lib/sanity/transformers";
+import type {
+  SanityEngagement,
+  SanityPillarStatus,
+} from "@/app/_lib/sanity/types";
+import {
+  toInstructor,
+  toUIArticleCard,
+  toUICourse,
+} from "@/app/_lib/sanity/transformers";
+import { formatDateRange, totalDays } from "@/app/_lib/time";
 
 export const revalidate = 60;
 
-function dateRange(start: string, end: string): string {
-  const fmt = (d: string) =>
-    new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  return `${fmt(start)} → ${fmt(end)}`;
-}
-
-function totalDays(start: string, end: string): number {
-  const s = new Date(start).getTime();
-  const e = new Date(end).getTime();
-  return Math.max(1, Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1);
-}
+const PILLAR_STATUS_LABEL: Record<SanityPillarStatus, string> = {
+  done: "Complete",
+  active: "In progress",
+  upcoming: "Upcoming",
+};
 
 export default async function EngagementHomePage() {
   const engagement = (await getEngagement()) as SanityEngagement | null;
@@ -33,7 +35,7 @@ export default async function EngagementHomePage() {
 
   const pillars = engagement.pillars ?? [];
   const pinnedCourses = (engagement.pinnedCourses ?? []).map((c) => toUICourse(c));
-  const pinnedArticles = (engagement.pinnedArticles ?? []).map(toUIArticle);
+  const pinnedArticles = (engagement.pinnedArticles ?? []).map(toUIArticleCard);
   const lead = engagement.lead ? toInstructor(engagement.lead) : null;
   const bench = (engagement.bench ?? []).map((m) => ({
     member: m,
@@ -51,7 +53,7 @@ export default async function EngagementHomePage() {
                 `Day ${currentDay} of ${days}. Here's where we are.`}
             </h1>
             <div className="page-sub">
-              {dateRange(engagement.startDate, engagement.endDate)}
+              {formatDateRange(engagement.startDate, engagement.endDate)}
               {engagement.slackChannel ? ` · ${engagement.slackChannel}` : ""}
             </div>
           </div>
@@ -146,12 +148,7 @@ export default async function EngagementHomePage() {
                   <div className="phase-meta">
                     <div className="phase-name">{p.name}</div>
                     <div className="phase-dates">
-                      {p.summary ??
-                        (p.status === "done"
-                          ? "Complete"
-                          : p.status === "active"
-                            ? "In progress"
-                            : "Upcoming")}
+                      {p.summary ?? PILLAR_STATUS_LABEL[p.status]}
                     </div>
                   </div>
                   <div className="phase-right">

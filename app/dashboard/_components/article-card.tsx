@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { InstructorChip } from "./portrait";
-import type { UIArticle } from "@/app/_lib/sanity/transformers";
+import type { UIArticleCard } from "@/app/_lib/sanity/transformers";
 
-function ArticleThumb({ article }: { article: UIArticle }) {
+function ArticleThumb({ article }: { article: UIArticleCard }) {
   const accent = article.accentColor ?? article.instructor.color;
   const accent2 = article.instructor.color2;
   if (article.thumbnailUrl) {
@@ -35,7 +35,7 @@ function ArticleThumb({ article }: { article: UIArticle }) {
   );
 }
 
-export function ArticleCard({ article }: { article: UIArticle }) {
+export function ArticleCard({ article }: { article: UIArticleCard }) {
   const date = new Date(article.publishedAt).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",

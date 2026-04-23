@@ -2,39 +2,23 @@
 
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
-import { currentUser } from "@clerk/nextjs/server";
 import { writeClient } from "@/sanity/lib/client";
+import { getCurrentAuthor } from "@/app/_lib/workspace";
+import { parseCsv, slugify } from "@/app/_lib/strings";
+import { resolveWorkspaceId } from "@/app/_lib/sanity/write-helpers";
+import { MODELS, type Model } from "@/app/_lib/sanity/transformers";
 
 export type AuthorAgentState = {
   error?: string;
 };
 
-function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 60);
-}
-
-function parseCsv(raw: FormDataEntryValue | null): string[] {
-  if (typeof raw !== "string") return [];
-  return raw
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .slice(0, 20);
-}
-
 export async function authorAgent(
   _prev: AuthorAgentState,
   formData: FormData,
 ): Promise<AuthorAgentState> {
-  const user = await currentUser();
-  if (!user) return { error: "You must be signed in to author an agent." };
-
-  const workspaceSlug = (user.publicMetadata?.workspace ?? "") as string;
-  if (!workspaceSlug) {
+  const author = await getCurrentAuthor();
+  if (!author) return { error: "You must be signed in to author an agent." };
+  if (!author.workspace) {
     return {
       error:
         "No workspace is assigned to your account. Ask your Midnight lead to set one.",
@@ -47,7 +31,7 @@ export async function authorAgent(
   const description = String(formData.get("description") ?? "").trim();
   const systemPrompt = String(formData.get("systemPrompt") ?? "").trim();
   const example = String(formData.get("example") ?? "").trim();
-  const model = String(formData.get("model") ?? "sonnet");
+  const model = String(formData.get("model") ?? "sonnet") as Model;
   const tools = parseCsv(formData.get("tools"));
   const tags = parseCsv(formData.get("tags"));
 
@@ -55,59 +39,47 @@ export async function authorAgent(
   if (!description) return { error: "Description is required." };
   if (!systemPrompt)
     return { error: "System prompt is required — this is the agent's body." };
-  if (!["haiku", "sonnet", "opus"].includes(model)) {
-    return { error: "Pick a valid model." };
-  }
+  if (!MODELS.includes(model)) return { error: "Pick a valid model." };
 
-  const slug = slugify(slugInput || name);
+  const slug = slugify(slugInput || name, 60);
   if (!slug) return { error: "Can't derive a slug from that name." };
 
-  const authorDisplay =
-    [user.firstName, user.lastName].filter(Boolean).join(" ") ||
-    user.username ||
-    (user.primaryEmailAddress?.emailAddress ?? "Team");
+  const [workspaceId, existing] = await Promise.all([
+    resolveWorkspaceId(author.workspace),
+    writeClient.fetch<string | null>(
+      `*[_type == "agent" && slug.current == $slug][0]._id`,
+      { slug },
+    ),
+  ]);
 
-  // Look up the engagement by workspace slug
-  const engagement = await writeClient.fetch<{ _id: string } | null>(
-    `*[_type == "engagement" && slug.current == $slug][0]{ _id }`,
-    { slug: workspaceSlug },
-  );
-  if (!engagement) {
-    return {
-      error: `No engagement found for workspace "${workspaceSlug}".`,
-    };
+  if (!workspaceId) {
+    return { error: `No engagement found for workspace "${author.workspace}".` };
   }
-
-  // Collision check
-  const existing = await writeClient.fetch<{ _id: string } | null>(
-    `*[_type == "agent" && slug.current == $slug][0]{ _id }`,
-    { slug },
-  );
   if (existing) {
     return {
       error: `An agent with the slug "${slug}" already exists. Pick another.`,
     };
   }
 
-  const doc = await writeClient.create({
+  await writeClient.create({
     _type: "agent",
     name,
     slug: { _type: "slug", current: slug },
     tier: "custom",
-    tagline: tagline || undefined,
+    tagline,
     description,
     systemPrompt,
-    example: example || undefined,
+    example,
     model,
-    tools: tools.length ? tools : undefined,
-    tags: tags.length ? tags : undefined,
+    tools,
+    tags,
     stats: { power: 3, speed: 4, depth: 3 },
-    author: `${authorDisplay} · ${workspaceSlug}`,
-    workspace: { _type: "reference", _ref: engagement._id },
+    author: `${author.displayName} · ${author.workspace}`,
+    workspace: { _type: "reference", _ref: workspaceId },
   });
 
   revalidateTag("agent", "max");
-  revalidateTag(`agent:workspace:${workspaceSlug}`, "max");
+  revalidateTag(`agent:workspace:${author.workspace}`, "max");
 
   redirect(`/dashboard/learn/agents/${slug}`);
 }
